@@ -1,6 +1,6 @@
 /*
 Автор: Клюенков Владимир vaklyuenkov@gmail.com
-Дата: 5.11.19
+Дата: 7.11.19
 
 2_2. Старый компьютер
 
@@ -46,9 +46,9 @@ class PriorityQueue
             int heap_size;
             void siftDown(int position);
             void siftUp(int position);
-            int parentPosition(int position) const;     //to reuse calculations of index position
-            int lefChildPosition(int position) const;   //to reuse calculations of index position
-            int rightChildPosition(int position) const; //to reuse calculations of index position
+            int getParentPosition(int position) const;     //to reuse calculations of index position
+            int getLefChildPosition(int position) const;   //to reuse calculations of index position
+            int getRightChildPosition(int position) const; //to reuse calculations of index position
     };
 
 PriorityQueue::PriorityQueue(int input_size)
@@ -97,20 +97,20 @@ void PriorityQueue::siftDown(int position)
         // use while because it is more safe than recursion
         while(position*2+1 <= heap_size-1) // check that current position could have at least one child
         {
-            int left_child_position = getLefChildPosition(position);
-            int right_child_position = getRightChildPosition(position);
-            int position_of_minimum = position;
+            int lefChildPosition = getLefChildPosition(position);
+            int rightChildPosition = getRightChildPosition(position);
+            int positionOfMinimum = position;
 
-            if (left_child_position <= heap_size-1 && heap_array[left_child_position] < heap_array[position])
-                position_of_minimum = left_child_position;
+            if (lefChildPosition <= heap_size - 1 && heap_array[lefChildPosition] < heap_array[position])
+                positionOfMinimum = lefChildPosition;
 
-            if (right_child_position <= heap_size-1 && heap_array[right_child_position] < heap_array[position_of_minimum])
-                position_of_minimum = right_child_position;
+            if (rightChildPosition <= heap_size - 1 && heap_array[rightChildPosition] < heap_array[positionOfMinimum])
+                positionOfMinimum = rightChildPosition;
 
-            if (position != position_of_minimum)
+            if (position != positionOfMinimum)
                 {
-                    std::swap(heap_array[position], heap_array[position_of_minimum]);
-                    position = position_of_minimum;
+                    std::swap(heap_array[position], heap_array[positionOfMinimum]);
+                    position = positionOfMinimum;
                 }
             else break;
         }
@@ -132,7 +132,7 @@ void PriorityQueue::push(int value)
         heap_array[heap_size - 1] = value;
         siftUp(heap_size - 1);
     }
-    
+
 int main()
     {
         // read input and build MinHeap
