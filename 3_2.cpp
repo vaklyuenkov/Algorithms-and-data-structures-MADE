@@ -15,27 +15,27 @@
 #include <iostream>
 
 // to sort we will use heap functions from my previous task
-int parentPosition(int position)
+int getParentPosition(int position)
 {
     return (position-1)/2;
 }
 
-int lefChildPosition(int position)
+int getLefChildPosition(int position)
 {
     return (2*position+1);
 }
 
-int rightChildPosition(int position)
+int getRightChildPosition(int position)
 {
     return (2*position+2);
 }
 
 void siftUp(int *array, int position)
 {
-    while (position > 0 && array[parentPosition(position)] < array[position])
+    while (position > 0 && array[getParentPosition(position)] < array[position])
     {
-        std::swap(array[position], array[parentPosition(position)]);
-        position = parentPosition(position);
+        std::swap(array[position], array[getParentPosition(position)]);
+        position = getParentPosition(position);
     }
 }
 
@@ -43,20 +43,20 @@ void siftDown(int *heapArray, int heapSize,  int position)
 {
     while(position*2+1 <= heapSize-1)  // check that current position could have at least one child
     {
-        int left_child_position = lefChildPosition(position);
-        int right_child_position = rightChildPosition(position);
-        int position_of_maximum = position;
+        int lefChildPosition = getLefChildPosition(position);
+        int rightChildPosition = getRightChildPosition(position);
+        int positionOfMaximum = position;
 
-        if (left_child_position <= heapSize-1 && heapArray[left_child_position] > heapArray[position])
-            position_of_maximum = left_child_position;
+        if (lefChildPosition <= heapSize - 1 && heapArray[lefChildPosition] > heapArray[position])
+            positionOfMaximum = lefChildPosition;
 
-        if (right_child_position <= heapSize-1 && heapArray[right_child_position] > heapArray[position_of_maximum])
-            position_of_maximum = right_child_position;
+        if (rightChildPosition <= heapSize - 1 && heapArray[rightChildPosition] > heapArray[positionOfMaximum])
+            positionOfMaximum = rightChildPosition;
 
-        if (position != position_of_maximum)
+        if (position != positionOfMaximum)
         {
-            std::swap(heapArray[position], heapArray[position_of_maximum]);
-            position = position_of_maximum;
+            std::swap(heapArray[position], heapArray[positionOfMaximum]);
+            position = positionOfMaximum;
         }
         else break;
     }
