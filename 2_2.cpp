@@ -67,17 +67,17 @@ bool PriorityQueue::empty() const
         return heap_size == 0;
     }
 
-int PriorityQueue::parentPosition(int position) const
+int PriorityQueue::getParentPosition(int position) const
     {
         return (position-1)/2;
     }
 
-int PriorityQueue::lefChildPosition(int position)  const
+int PriorityQueue::getLefChildPosition(int position)  const
     {
         return (2*position+1);
     }
 
-int PriorityQueue::rightChildPosition(int position) const
+int PriorityQueue::getRightChildPosition(int position) const
     {
         return (2*position+2);
     }
@@ -85,10 +85,10 @@ int PriorityQueue::rightChildPosition(int position) const
 void PriorityQueue::siftUp(int position)
     {
         // use while because it is more safe than recursion
-        while (position > 0 && heap_array[parentPosition(position)] > heap_array[position])
+        while (position > 0 && heap_array[getParentPosition(position)] > heap_array[position])
         {
-            std::swap(heap_array[position], heap_array[parentPosition(position)]);
-            position = parentPosition(position);
+            std::swap(heap_array[position], heap_array[getParentPosition(position)]);
+            position = getParentPosition(position);
         }
     }
 
@@ -97,8 +97,8 @@ void PriorityQueue::siftDown(int position)
         // use while because it is more safe than recursion
         while(position*2+1 <= heap_size-1) // check that current position could have at least one child
         {
-            int left_child_position = lefChildPosition(position);
-            int right_child_position = rightChildPosition(position);
+            int left_child_position = getLefChildPosition(position);
+            int right_child_position = getRightChildPosition(position);
             int position_of_minimum = position;
 
             if (left_child_position <= heap_size-1 && heap_array[left_child_position] < heap_array[position])
