@@ -24,49 +24,81 @@
 
 */
 #include <iostream>
+#include <vector>
+#include <functional>
 
-struct TreeNode
-    {
-    explicit TreeNode(int _value) : value(_value) {}
 
-        int value = 0;
-        TreeNode* Left = nullptr;
-        TreeNode* Right = nullptr;
-        TreeNode* Parent = nullptr; //need for in-order and post-order
-    };
-
+template <class T>
 class BinaryTree
     {
         public:
+            BinaryTree(){};
             ~BinaryTree();
-            void PrintTreeInOrder() const;
-            void Add(int value);
+            BinaryTree(const BinaryTree&) = delete; // five-rule
+            BinaryTree(BinaryTree&&) = delete;
+            BinaryTree& operator=(const BinaryTree&) = delete;
+            BinaryTree& operator=(BinaryTree&&) = delete;
+
+            void Add(T value);
+            std::vector <T> GetAnswer();
 
         private:
+            struct TreeNode
+            {
+                explicit TreeNode(T _value) : value(_value) {}
+
+                int value = 0;
+                TreeNode* Left = nullptr;
+                TreeNode* Right = nullptr;
+                TreeNode* Parent = nullptr; //need for in-order and post-order
+            };
+            std::vector <T> answer;
+
             TreeNode* root = nullptr;
-            void print_subtree(TreeNode* node) const;
+            void InOrder(void (visit)(TreeNode*, std::vector<T>&));
     };
 
-BinaryTree::~BinaryTree()
+
+template <class T>
+std::vector <T> BinaryTree<T>::GetAnswer()
+{
+    InOrder([](TreeNode* node, std::vector <T> &answer)
+            {
+                answer.push_back(node->value);
+            });
+
+    return answer;
+}
+
+template <class T>
+BinaryTree<T>::~BinaryTree()
     {
-    // implementing post-order to delete whole Binary Tree from leafs to root
+        InOrder([](TreeNode* node, std::vector <T> &answer){delete node;});
+    }
+
+template <class T>
+void BinaryTree<T>::InOrder(void (visit)(TreeNode*, std::vector<T>&))
+    {
+        // implementing in-order to print whole Binary Tree
+        // almost hte same as in post-order in destructor, except we print in case 1 (went from left TreeNode)
         if (root == nullptr) return;
         TreeNode* currentNode = root;
         TreeNode* leftNode = nullptr;
         TreeNode* rightNode = nullptr;
         TreeNode* parentNode = nullptr;
-        int state = 0; // we will use this variable to store state
+        // we will use this variable to store state
+        int state = 0;
         // 0 went down in child treeNode
         // 1 went from left TreeNode
         // 2 went from right TreeNode
 
-        while (currentNode != root || state != 2) // when went to root from right child - all nodes deleted
+        while (currentNode != root || state != 2)
         {
             switch (state)
             {
                 case 0:
                 {
-                    leftNode = currentNode->Left; // go in left child while we can
+                    leftNode = currentNode->Left;
                     if (leftNode != nullptr)
                     {
                         currentNode = leftNode;
@@ -74,14 +106,15 @@ BinaryTree::~BinaryTree()
                     }
                     else
                     {
-                        state = 1; // when we there is no left child it is the same we went from left child
+                        state = 1;
                     }
                 }
-                    break;
+                break;
 
-                case 1: //when we went from left child we need to go in right child
-                {
-                    rightNode = currentNode->Right;
+                case 1:
+                 {
+                     visit(currentNode, answer);
+                     rightNode = currentNode->Right;
                     if (rightNode != nullptr)
                     {
                         currentNode = rightNode;
@@ -89,12 +122,12 @@ BinaryTree::~BinaryTree()
                     }
                     else
                     {
-                        state = 2; // when we there is no right child it is the same we went from right child
+                        state = 2;
                     }
                 }
-                    break;
+                break;
 
-                case 2: // in this case we already was in all children and need to go up
+                case 2:
                 {
                     parentNode = currentNode->Parent;
                     if (currentNode == parentNode->Left)
@@ -105,88 +138,15 @@ BinaryTree::~BinaryTree()
                     {
                         state = 2;
                     }
-                    delete currentNode;
                     currentNode = parentNode;
                 }
-                    break;
+                break;
             }
-        }
-
-        if (root != nullptr) //finally delete root
-        {
-            delete root;
         }
     }
 
-void BinaryTree::PrintTreeInOrder() const
-{
-    // implementing in-order to print whole Binary Tree
-    // almost hte same as in post-order in destructor, except we print in case 1 (went from left TreeNode)
-    if (root == nullptr) return;
-    TreeNode* currentNode = root;
-    TreeNode* leftNode = nullptr;
-    TreeNode* rightNode = nullptr;
-    TreeNode* parentNode = nullptr;
-    // we will use this variable to store state
-    int state = 0;
-    // 0 went down in child treeNode
-    // 1 went from left TreeNode
-    // 2 went from right TreeNode
-
-    while (currentNode != root || state != 2)
-    {
-        switch (state)
-        {
-            case 0:
-            {
-                leftNode = currentNode->Left;
-                if (leftNode != nullptr)
-                {
-                    currentNode = leftNode;
-                    state = 0;
-                }
-                else
-                {
-                    state = 1;
-                }
-            }
-            break;
-
-            case 1:
-             {
-                 std::cout << currentNode->value << " ";
-                 rightNode = currentNode->Right;
-                if (rightNode != nullptr)
-                {
-                    currentNode = rightNode;
-                    state = 0;
-                }
-                else
-                {
-                    state = 2;
-                }
-            }
-            break;
-
-            case 2:
-            {
-                parentNode = currentNode->Parent;
-                if (currentNode == parentNode->Left)
-                {
-                    state = 1;
-                }
-                else
-                {
-                    state = 2;
-                }
-                currentNode = parentNode;
-            }
-            break;
-        }
-    }
-}
-
-void BinaryTree::Add(int value)
+template <class T>
+void BinaryTree<T>::Add(T value)
     {
         TreeNode* newTreeNode = new TreeNode(value);
         TreeNode* parentForValue = nullptr;
@@ -221,12 +181,15 @@ void BinaryTree::Add(int value)
         }
     }
 
+
 int main()
     {
         // read input and build BinaryTree
         int input_size = 0;
         std::cin >> input_size;
-        BinaryTree tree;
+
+        std::vector <int> answer;
+        BinaryTree<int> tree;
 
         for (int i = 0; i < input_size; i++)
         {
@@ -235,6 +198,14 @@ int main()
             tree.Add(value);
         }
 
-        tree.PrintTreeInOrder();
+        answer = tree.GetAnswer();
+
+        for (auto result: answer)
+        {
+            std::cout <<  result << " ";
+        }
+
+
         return 0;
     }
+
