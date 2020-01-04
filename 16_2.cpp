@@ -32,51 +32,61 @@ stdout:
 #include <vector>
 #include <string>
 
-void findSubstrings(const std::string &inputString, const std::string &pattern, std::vector <int> &result)
+std::vector <int> findSubstrings(const std::string &inputString, const std::string &pattern)
     {
-        std::string concatinatedString = pattern + "|" + inputString; // "|"  to debug
-
         const int patternSize = pattern.size();
-        const int concatinatedStringSize = inputString.size() + patternSize + 1;
+        const int inputStringSize = inputString.size();
         int left = 0;
         int right = 0;
-        std::vector <int> zFunction(patternSize, 0);
+        int currentZFunction = 0;
+        std::vector<int> zFunction(patternSize, 0);
+        std::vector<int> result;
 
-        for (int i = 1; i < concatinatedStringSize; i++)
+
+        for (int position = 1; position < patternSize; position++)  //first calculate z-function for pattern
         {
-            int currentZFunction = 0;
-            if (i - left <= patternSize)
-                {
-                    currentZFunction = std::max(0, std::min(right - i, zFunction[i - left]));
-                }
-            else
-                {
-                    currentZFunction = std::max(0, right - i);
-                }
+            zFunction[position] = std::max(0, std::min(zFunction[position - left], right - position + 1));
 
-            while (i + currentZFunction < concatinatedStringSize && concatinatedString[currentZFunction] == concatinatedString[i + currentZFunction])
-                {
-                    currentZFunction++;
-                }
+            while ((position + zFunction[position] < inputStringSize) &&
+                   (pattern[zFunction[position]] == pattern[position + zFunction[position]]))
+            {
+                zFunction[position]++;
+            }
 
-            if (i + currentZFunction - 1 > right)
-                {
-                    left = i;
-                    right = i + currentZFunction - 1;
-                }
-
-            if (i < patternSize)
-                {
-                    zFunction[i] = currentZFunction;
-                }
-
-            if (currentZFunction == patternSize)
-                {
-                    result.push_back(i - patternSize - 1);
-                }
+            if (position + zFunction[position] - 1 > right)
+            {
+                left = position;
+                right = position + zFunction[position] - 1;
+            }
         }
-    }
 
+
+        left = 0;
+        right = 0;
+        for (int position = 0;
+             position < inputStringSize; position++) //calculate z-function for current position in input text
+        {
+            currentZFunction = std::max(0, std::min(zFunction[position - left], right - position + 1));
+
+            while ((position + currentZFunction < inputStringSize) &&
+                   (pattern[currentZFunction] == inputString[position + currentZFunction]))
+            {
+                currentZFunction++;
+            }
+
+            if (position + currentZFunction - 1 > right)
+            {
+                left = position;
+                right = position + currentZFunction - 1;
+            }
+
+            if (currentZFunction == patternSize) // save position to answer
+            {
+                result.push_back(position);
+            }
+        }
+        return result;
+    }
 
 int main()
     {
@@ -84,7 +94,7 @@ int main()
         std::vector <int> result; //to output only in main
         std::cin >> pattern >> inputString;
 
-        findSubstrings(inputString, pattern, result);
+        result = findSubstrings(inputString, pattern);
         for (auto a: result)
         {
             std::cout << a << " ";
