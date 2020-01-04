@@ -55,184 +55,169 @@ OK
 #include <cassert>
 #include <vector> //in this task we can use vector according to seminar
 
-int HornerHash(const std::string& str, int m) //let m size of buffer - buffer size is power of 2
-    {
-        const int a = 31;
-        int hash = 0;
-        for (char i : str)
-        {
-            hash = (hash*a + i)%m; //according to our task conditions
-        }
-        return hash;
-    }
 
+struct HornerHash
+    {
+        int operator()(const std::string& str, int m)
+        {
+            int hash = 0;
+            const int a = 31;
+            for (char i : str) {
+                hash = (hash*a + i) % m; //according to our task conditions
+
+            }
+            return hash;
+        }
+    };
+
+template <class T, class THashFunction>
 class HashTable
     {
         public:
-            explicit HashTable(int initialSize);
-            ~HashTable();
+            explicit HashTable(int initialSize, T initEmptyValue, T initDeletedValue);
+            ~HashTable() = default;
             HashTable(const HashTable&) = delete; //according to five-rule, as was said on seminar
             HashTable(HashTable&&) = delete; //according to five-rule, as was said on seminar
             HashTable& operator=(const HashTable&)=delete; //according to five-rule, as was said on seminar
             HashTable& operator=(const HashTable&&)=delete; //according to five-rule, as was said on seminar
-            bool Has(const std::string& key) const;
-            bool Add(const std::string& key);
-            bool Remove(const std::string& key);
+            bool Has(const T& key) const;
+            bool Add(const T& key);
+            bool Remove(const T& key);
         private:
             int bufferSize;
-            struct HashTableNode
-            {
-                std::string key;
-                explicit HashTableNode(std::string key_) : key(std::move(key_)) {}
-            };
-            std::vector<HashTableNode*> buffer;
+            T deletedValue;
+            T emptyValue;
+            std::vector<T> buffer;
             void ReHash();
     };
 
-HashTable::HashTable(int initialSize) : buffer(initialSize, nullptr), bufferSize(0) {}
+template <class T, class THashFunction>
+HashTable<T, THashFunction>::HashTable(int initialSize,  T initEmptyValue, T initDeletedValue)
+{
+    emptyValue = initEmptyValue;
+    deletedValue = initDeletedValue;
+    buffer = std::vector<T>(initialSize, emptyValue);
+}
 
-HashTable::~HashTable()
-    {
-        for (int i = 0; i < (int)buffer.size(); i++)
-        {
-            if (buffer[i])
-            {
-                delete buffer[i];
-            }
-        }
-    }
-
-bool HashTable::Has(const std::string& key) const
+template <class T, class THashFunction>
+bool HashTable<T, THashFunction>::Has(const T& key) const
     {
         assert(!key.empty());
-        const int hash = HornerHash(key, buffer.size());
-        if (buffer[hash] == nullptr)
+
+        THashFunction hashFunction;
+        int index = 0;
+        int hash = hashFunction(key, buffer.size());
+
+        while (buffer[hash] != emptyValue && buffer[hash] != deletedValue)
         {
-            return false;
-        }
-        else  if (buffer[hash]->key == key)
-        {
-            return true;
-        }
-        else
-        {
-            int probe = hash;
-            for (int i = 0; i < buffer.size(); i++)
+            if (buffer[hash] == key)
             {
-                probe = (probe+i+1) % (int)buffer.size();
-                if (buffer[probe] == nullptr)
-                {
-                    return false;
-                }
-                else if (buffer[probe]->key == key)
-                {
-                    return true;
-                }
+                return true;
             }
-            return true;
+            index++;
+            hash = (hash + index + 1) % buffer.size();
         }
+
+        return false;
     }
 
-bool HashTable::Add(const std::string& key)
+template <class T, class THashFunction>
+bool HashTable<T, THashFunction>::Add(const T& key)
     {
+        assert(key != emptyValue);
+        if (key == deletedValue)
+            return false;
+
+        THashFunction hashFunction;
         if (bufferSize*4 >=  buffer.size()*3)
         {
             ReHash();
         }
-        int hash = HornerHash(key, buffer.size());
-        if (buffer[hash] == nullptr)
+
+        int hash = hashFunction(key, buffer.size());
+        int  index = 0;
+        int flag = false;
+        while (index < buffer.size())
         {
-            buffer[hash] = new HashTableNode(key);
-            bufferSize++;
-            return true;
-        }
-        else
-        {
-            int probe = hash;
-            if (buffer[hash]-> key == key)
+
+            if (buffer[hash] == emptyValue)
+            {
+                buffer[hash] = key;
+                bufferSize++;
+                return true;
+            }
+            if (buffer[hash] == key)
             {
                 return false;
             }
-            for (size_t i = 0; i < buffer.size(); i++)
-            {
-                probe = (probe + i + 1) % buffer.size();
-                if (buffer[probe] == nullptr)
-                {
-                    buffer[probe] = new HashTableNode(key);
-                    bufferSize++;
-                    return true;
-                }
-                else if (buffer[probe]-> key == key)
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-    }
 
-bool HashTable::Remove(const std::string& key)
-    {
-        const int hash = HornerHash(key, buffer.size());
-        if (buffer[hash] == nullptr)
-        {
-            return false;
+            if (buffer[hash] == deletedValue && !flag)
+            {
+                flag = true;
+            }
+
+            index++;
+            hash = (hash+index+1)%buffer.size();
         }
-        else if (buffer[hash]->key == key)
+
+        if (flag)
         {
-            buffer[hash]->key = "";
+            buffer[hash] = key;
+            bufferSize++;
             return true;
         }
-        else
-        {
-            int probe = hash;
-            for (size_t i = 0; i < buffer.size(); i++)
-            {
-                probe = (probe + i + 1) % buffer.size();
-                if (buffer[probe] == nullptr)
-                {
-                    return false;
-                }
-                else if (buffer[probe]->key == key)
-                {
-                    buffer[probe]->key = "";
-                    return true;
-                }
 
-            }
-            return false;
-        }
+        return false;
     }
 
-void HashTable::ReHash()
+template <class T, class THashFunction>
+bool HashTable<T, THashFunction>::Remove(const T& key)
     {
-        std::vector<HashTableNode*> oldBuffer = buffer;
-        bufferSize = 0;
+        assert(key != emptyValue);
+        THashFunction hashFunction;
+        if (key == deletedValue)
+        {
+            return false;
+        }
 
+        int hash = hashFunction(key, buffer.size());
+        int index = 0;
+
+        while (buffer[hash] != emptyValue)
+        {
+            if (buffer[hash] == key)
+            {
+                buffer[hash] = deletedValue;
+                bufferSize--;
+                return true;
+            }
+            index++;
+            hash = (hash+index+1)%buffer.size();
+        }
+
+        return false;
+    }
+
+template <class T, class THashFunction>
+void HashTable<T, THashFunction>::ReHash()
+    {
+        std::vector<T> oldBuffer = buffer;
+        bufferSize = 0;
         buffer.assign(oldBuffer.size() * 2, nullptr);
 
         for (int i = 0; i < oldBuffer.size(); i++)
         {
-            if (oldBuffer[i])
+            if (oldBuffer[i] != deletedValue && oldBuffer[i] != emptyValue)
             {
-
-                if (oldBuffer[i]->key.empty())
-                {
-                    delete oldBuffer[i];
-                }
-                else
-                {
-                    Add(oldBuffer[i]->key);
+                    Add(oldBuffer[i]);
                     bufferSize++;
-                    delete oldBuffer[i];
-                }
             }
         }
     }
 
 int main()
     {
-        HashTable hashTable(8);
+        HashTable<std::string, HornerHash>  hashTable(8, "", "_deleted_");
         char command = ' ';
         std::string value;
         while (std::cin >> command >> value)
