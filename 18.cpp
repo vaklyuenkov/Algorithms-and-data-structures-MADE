@@ -37,38 +37,42 @@ stdout:
 
 using namespace std;
 
+template <class T>
 struct TwoDPoint
 {
-    double x;
-    double y;
+    T x;
+    T y;
 };
 
 
-
-double calculateSquaredDistance(const TwoDPoint& firstPoint, const TwoDPoint& secondPoint)
+template <class T>
+T calculateSquaredDistance(const TwoDPoint<T>& firstPoint, const TwoDPoint<T>& secondPoint)
 {
     return (firstPoint.x - secondPoint.x) * (firstPoint.x - secondPoint.x) + (firstPoint.y - secondPoint.y) * (firstPoint.y - secondPoint.y);
 }
 
-double calculateDistance(const TwoDPoint& firstPoint, const TwoDPoint& secondPoint)
+template <class T>
+T calculateDistance(const TwoDPoint<T>& firstPoint, const TwoDPoint<T>& secondPoint)
 {
     return sqrt(calculateSquaredDistance(firstPoint, secondPoint));
 }
 
-double CalculateVectorMultiplication(const TwoDPoint& firstPoint, const TwoDPoint& secondPoint, const TwoDPoint& thirdPoint)
+template <class T>
+T CalculateVectorMultiplication(const TwoDPoint<T>& firstPoint, const TwoDPoint<T>& secondPoint, const TwoDPoint<T>& thirdPoint)
 {
-    double result = (secondPoint.x - firstPoint.x) * (thirdPoint.y - secondPoint.y) - (secondPoint.y - firstPoint.y) * (thirdPoint.x - secondPoint.x);
+    T result = (secondPoint.x - firstPoint.x) * (thirdPoint.y - secondPoint.y) - (secondPoint.y - firstPoint.y) * (thirdPoint.x - secondPoint.x);
     return result;
 }
 
+template <class T>
 struct ComparatorWithReferencePoint
 {
 
-    ComparatorWithReferencePoint(const TwoDPoint& referencePoint_) : referencePoint(referencePoint_) {}
+    ComparatorWithReferencePoint(const TwoDPoint<T>& referencePoint_) : referencePoint(referencePoint_) {}
 
-    bool operator()(const TwoDPoint& firstPoint, const TwoDPoint& secondPoint)
+    bool operator()(const TwoDPoint<T>& firstPoint, const TwoDPoint<T>& secondPoint)
     {
-        double multiplication = CalculateVectorMultiplication(secondPoint, firstPoint, referencePoint);
+        T multiplication = CalculateVectorMultiplication(secondPoint, firstPoint, referencePoint);
         if (multiplication == 0)
         {
             return (calculateDistance(secondPoint, referencePoint) < calculateDistance(firstPoint, referencePoint));
@@ -76,14 +80,14 @@ struct ComparatorWithReferencePoint
         return multiplication < 1e-10; // with accuracy epsilon
     }
 
-    const TwoDPoint& referencePoint;
+    const TwoDPoint<T>& referencePoint;
 };
 
-
-double CalculatePerimeter(std::vector<TwoDPoint> points)
+template <class T>
+T CalculatePerimeter(std::vector<TwoDPoint<T>> points)
 {
     assert(points.size() > 1);
-    double perimeter = 0.0;
+    T perimeter = 0.0;
     for (int i = 0; i < points.size() - 1; ++i)
     {
         perimeter += calculateDistance(points[i], points[i + 1]);
@@ -92,9 +96,9 @@ double CalculatePerimeter(std::vector<TwoDPoint> points)
     return perimeter;
 }
 
-
-vector<TwoDPoint> BuildConvexHull(vector<TwoDPoint> points) {
-    vector<TwoDPoint> convexHull;
+template <class T>
+vector<TwoDPoint<T>> BuildConvexHull(vector<TwoDPoint<T>> points) {
+    vector<TwoDPoint<T>> convexHull;
     int indexOfReferencePoint = 0;
     for (int i = 0; i < points.size(); ++i) {
         if (points[i].x < points[indexOfReferencePoint].x) indexOfReferencePoint = i;
@@ -122,19 +126,19 @@ vector<TwoDPoint> BuildConvexHull(vector<TwoDPoint> points) {
 int main()
 {
     int inputSize = 0;
-    std::vector<TwoDPoint> points;
+    std::vector<TwoDPoint<double >> points;
     std::cin >> inputSize;
     assert(inputSize <= 100000);
 
     for (int i = 0; i<inputSize; i++)
     {
-        TwoDPoint point;
+        TwoDPoint<double > point;
         std::cin >> point.x >> point.y;
         points.push_back(point);
     }
     double answer = 0;
     cout.precision(9);
-    vector<TwoDPoint> convexHull = BuildConvexHull(points);
+    vector<TwoDPoint<double >> convexHull = BuildConvexHull(points);
     if (convexHull.size() > 2)
     {
         answer = CalculatePerimeter(convexHull);
