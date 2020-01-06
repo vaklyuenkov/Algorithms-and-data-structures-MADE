@@ -2,17 +2,19 @@
 #include <random>
 #include "BoxMullerGenerator.hpp"
 
-BoxMullerGenerator::BoxMullerGenerator(int n)
+template <class TCoordinate>
+BoxMullerGenerator<TCoordinate>::BoxMullerGenerator(int n)
 {
     generate_points(n);
 }
 
-void BoxMullerGenerator::generate_points(int n)
+template <class TCoordinate>
+void BoxMullerGenerator<TCoordinate>::generate_points(int n)
 {
     points = {};
     std::random_device rd;
     std::mt19937_64 gen(rd());
-    std::uniform_real_distribution<double> dis(0.0, 1.0);
+    std::uniform_real_distribution<TCoordinate> dis(0.0, 1.0);
     for(int i = 0; i < n; ++i) {
         double radius = dis(gen);
         double phi = dis(gen);
@@ -24,7 +26,10 @@ void BoxMullerGenerator::generate_points(int n)
     }
 }
 
-std::vector<std::pair<double, double>> BoxMullerGenerator::getPoints() const
+template <class TCoordinate>
+std::vector<std::pair<TCoordinate, TCoordinate>> BoxMullerGenerator<TCoordinate>::getPoints() const
 {
     return points;
 }
+
+template class BoxMullerGenerator<double>;

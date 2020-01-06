@@ -4,12 +4,13 @@
 #include <utility>
 #include "EdgeGraph.hpp"
 
+template <class TVertex, class TWeight>
 class AdjacencyGraph {
 public:
     AdjacencyGraph();
     explicit AdjacencyGraph(unsigned long int size);
     explicit AdjacencyGraph(const AdjacencyGraph* from);
-    explicit AdjacencyGraph(const EdgeGraph& from);
+    explicit AdjacencyGraph(const EdgeGraph<TVertex,TWeight>& from);
     ~AdjacencyGraph() = default;
     AdjacencyGraph(const AdjacencyGraph&) = delete; // according to five-rule
     AdjacencyGraph(AdjacencyGraph&&) = delete;
@@ -19,11 +20,11 @@ public:
 
 
 
-    void Add(int from, int to, double weight);
-    std::vector<int> dfs(int start_vertex) const;
+    void Add(TVertex from, TVertex to, TWeight weight);
+    std::vector<TVertex> dfs(TVertex start_vertex) const;
     unsigned long int size() const;
-    std::vector<std::pair<int, double>>::const_iterator adjasentBegin(int vertex) const;
-    std::vector<std::pair<int, double>>::const_iterator adjasentEnd(int vertex) const;
+    std::vector<std::pair<int, double>>::const_iterator adjasentBegin(TVertex vertex) const;
+    std::vector<std::pair<int, double>>::const_iterator adjasentEnd(TVertex vertex) const;
 private:
-    std::vector<std::vector<std::pair<int, double>>> adjacencyList;
+    std::vector<std::vector<std::pair<TVertex, TWeight>>> adjacencyList;
 };

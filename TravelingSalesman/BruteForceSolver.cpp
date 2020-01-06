@@ -1,7 +1,8 @@
 #include <cmath>
 #include "BruteForceSolver.hpp"
 
-BruteForceSolver::BruteForceSolver(std::vector<std::pair<double, double>>& points)
+template <class TVertex, class TCoordinate, class TDistance>
+BruteForceSolver<TVertex, TCoordinate, TDistance>::BruteForceSolver(std::vector<std::pair<TCoordinate, TCoordinate>>& points)
 {
     distance = INFINITY;
     std::vector<bool> used(points.size(), false);
@@ -9,7 +10,8 @@ BruteForceSolver::BruteForceSolver(std::vector<std::pair<double, double>>& point
     generatePath(points, used, path);
 }
 
-void BruteForceSolver::generatePath(std::vector<std::pair<double, double>>& points, std::vector<bool>& used, std::vector<int>& path)
+template <class TVertex, class TCoordinate, class TDistance>
+void BruteForceSolver<TVertex, TCoordinate, TDistance>::generatePath(std::vector<std::pair<TCoordinate, TCoordinate>>& points, std::vector<bool>& used, std::vector<TVertex>& path)
 {
     bool flag = false;
     for(int i = 0; i < used.size(); ++i)
@@ -30,7 +32,8 @@ void BruteForceSolver::generatePath(std::vector<std::pair<double, double>>& poin
     }
 }
 
-double BruteForceSolver::computeDistance(std::vector<std::pair<double, double>>& points, std::vector<int>& path) const
+template <class TVertex, class TCoordinate, class TDistance>
+TDistance BruteForceSolver<TVertex, TCoordinate, TDistance>::computeDistance(std::vector<std::pair<TCoordinate, TCoordinate>>& points, std::vector<TVertex>& path) const
 {
     double currentDistance = 0;
     path.push_back(path[0]);
@@ -41,7 +44,11 @@ double BruteForceSolver::computeDistance(std::vector<std::pair<double, double>>&
     path.pop_back();
     return currentDistance;
 }
-double BruteForceSolver::getDistance() const
+
+template <class TVertex, class TCoordinate, class TDistance>
+TDistance BruteForceSolver<TVertex, TCoordinate, TDistance>::getDistance() const
 {
     return distance;
 }
+
+template class BruteForceSolver <int, double, double>;

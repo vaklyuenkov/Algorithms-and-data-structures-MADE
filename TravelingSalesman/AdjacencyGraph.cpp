@@ -1,18 +1,23 @@
 #include <stack>
 #include "AdjacencyGraph.hpp"
 
-AdjacencyGraph::AdjacencyGraph() = default;
-AdjacencyGraph::AdjacencyGraph(unsigned long int size)
+template <class TVertex, class TWeight>
+AdjacencyGraph< TVertex, TWeight>::AdjacencyGraph() = default;
+
+template <class TVertex, class TWeight>
+AdjacencyGraph< TVertex, TWeight>::AdjacencyGraph(unsigned long int size)
 {
     adjacencyList.resize(size);
 }
 
-AdjacencyGraph::AdjacencyGraph(const AdjacencyGraph* from): AdjacencyGraph(from->size())
+template <class TVertex, class TWeight>
+AdjacencyGraph< TVertex, TWeight>::AdjacencyGraph(const AdjacencyGraph* from): AdjacencyGraph(from->size())
 {
     this->adjacencyList = from->adjacencyList;
 }
 
-AdjacencyGraph::AdjacencyGraph(const EdgeGraph& from) : AdjacencyGraph(from.size())
+template <class TVertex, class TWeight>
+AdjacencyGraph< TVertex, TWeight>::AdjacencyGraph(const EdgeGraph<TVertex, TWeight>& from) : AdjacencyGraph(from.size())
 {
     for(auto edge: from)
     {
@@ -20,21 +25,23 @@ AdjacencyGraph::AdjacencyGraph(const EdgeGraph& from) : AdjacencyGraph(from.size
     }
 }
 
-void AdjacencyGraph::Add(int from, int to, double weight)
+template <class TVertex, class TWeight>
+void AdjacencyGraph< TVertex, TWeight>::Add(TVertex from, TVertex to, TWeight weight)
 {
     adjacencyList[from].emplace_back(std::make_pair(to, weight));
 }
 
-std::vector<int> AdjacencyGraph::dfs(int start_vertex) const
+template <class TVertex, class TWeight>
+std::vector<TVertex> AdjacencyGraph< TVertex, TWeight>::dfs(TVertex start_vertex) const
 {
-    std::vector<int> path;
+    std::vector<TVertex> path;
     std::vector<bool> visited(size(), false);
-    std::stack<int> dfsStack;
+    std::stack<TVertex> dfsStack;
     dfsStack.push(start_vertex);
     visited[start_vertex] = true;
     while(!dfsStack.empty())
     {
-        int current_vertex = dfsStack.top();
+        TVertex current_vertex = dfsStack.top();
         dfsStack.pop();
         path.push_back(current_vertex);
         for(int i = 0; i < adjacencyList[current_vertex].size(); ++i)
@@ -49,16 +56,21 @@ std::vector<int> AdjacencyGraph::dfs(int start_vertex) const
     return path;
 }
 
-unsigned long int AdjacencyGraph::size() const
+template <class TVertex, class TWeight>
+unsigned long int AdjacencyGraph< TVertex, TWeight>::size() const
 {
     return adjacencyList.size();
 }
 
-std::vector<std::pair<int, double>>::const_iterator AdjacencyGraph::adjasentBegin(int vertex) const {
+template <class TVertex, class TWeight>
+std::vector<std::pair<int, double>>::const_iterator AdjacencyGraph< TVertex, TWeight>::adjasentBegin(TVertex vertex) const {
     return adjacencyList[vertex].cbegin();
 }
 
-std::vector<std::pair<int, double>>::const_iterator AdjacencyGraph::adjasentEnd(int vertex) const
+template <class TVertex, class TWeight>
+std::vector<std::pair<int, double>>::const_iterator AdjacencyGraph< TVertex, TWeight>::adjasentEnd(TVertex vertex) const
 {
     return adjacencyList[vertex].cend();
 }
+
+template class AdjacencyGraph<int, double>;

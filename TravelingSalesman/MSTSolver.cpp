@@ -4,15 +4,17 @@
 #include "AdjacencyGraph.hpp"
 #include "MSTSolver.hpp"
 
-double MSTSolver::getDistance() const
+template <class TVertex, class TCoordinate, class TDistance>
+TDistance MSTSolver<TVertex, TCoordinate, TDistance>::getDistance() const
 {
     return distance;
 }
 
-MSTSolver::MSTSolver(std::vector<std::pair<double, double>>& points)
+template <class TVertex, class TCoordinate, class TDistance>
+MSTSolver<TVertex, TCoordinate, TDistance>::MSTSolver(std::vector<std::pair<TCoordinate, TCoordinate>>& points)
 {
     distance = 0;
-    EdgeGraph graph(points.size());
+    EdgeGraph<TVertex, TDistance> graph(points.size());
     for(int i = 0; i < points.size(); ++i)
     {
         for(int j = 0; j < points.size(); ++j)
@@ -26,8 +28,8 @@ MSTSolver::MSTSolver(std::vector<std::pair<double, double>>& points)
     }
 
     MST MST(graph);
-    AdjacencyGraph tree(MST.getTree());
-    std::vector<int> path = tree.dfs(0);
+    AdjacencyGraph<TVertex, TDistance> tree(MST.getTree());
+    std::vector<TVertex> path = tree.dfs(0);
     path.push_back(path[0]);
     for(int i = 0; i < path.size() - 1; ++i)
     {
@@ -35,3 +37,4 @@ MSTSolver::MSTSolver(std::vector<std::pair<double, double>>& points)
     }
 }
 
+template class MSTSolver<int, double, double>;

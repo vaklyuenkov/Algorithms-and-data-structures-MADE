@@ -1,19 +1,21 @@
 #include "MST.hpp"
 #include "NotOverlappingSets.hpp"
 
-EdgeGraph MST::getTree() const
+template <class TVertex, class TWeight>
+EdgeGraph<TVertex, TWeight> MST<TVertex, TWeight>::getTree() const
 {
     return tree;
 }
 
-MST::MST(EdgeGraph& graph)
+template <class TVertex, class TWeight>
+MST<TVertex, TWeight>::MST(EdgeGraph<TVertex, TWeight>& graph)
 {
-    tree = EdgeGraph(graph.size());
-    NotOverlappingSets set(graph.size());
+    tree = EdgeGraph<TVertex, TWeight>(graph.size());
+    NotOverlappingSets<TVertex> set(graph.size());
 
     while(tree.edgesNum() < 2 * (graph.size() - 1))
     {
-        std::vector<Edge> cheapestEdges(graph.size(), Edge());
+        std::vector<Edge<TVertex, TWeight>> cheapestEdges(graph.size(), Edge<TVertex, TWeight>());
         for(auto edge: graph)
         {
             if(set.find(edge.from) == set.find(edge.to))
@@ -41,3 +43,5 @@ MST::MST(EdgeGraph& graph)
         }
     }
 }
+
+template class MST<int, double>;

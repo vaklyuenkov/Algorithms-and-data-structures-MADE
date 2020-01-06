@@ -2,15 +2,17 @@
 
 #include <vector>
 
+template <class TVertex, class TWeight>
 struct Edge {
     Edge();
-    Edge(int from, int to, double weight);
+    Edge(TVertex from, TVertex to, TWeight weight);
 
-    int from;
-    int to;
-    double weight;
+    TVertex from;
+    TVertex to;
+    TWeight weight;
 };
 
+template <class TVertex, class TWeight>
 class EdgeGraph {
 public:
     EdgeGraph();
@@ -18,12 +20,12 @@ public:
     explicit EdgeGraph(const EdgeGraph* from);
     ~EdgeGraph() = default;
 
-    void add(int from, int to, double weight);
+    void add(TVertex from, TVertex to, TWeight weight);
     int edgesNum() const;
     int size() const;
-    std::vector<Edge>::const_iterator begin() const;
-    std::vector<Edge>::const_iterator end() const;
+    typename std::vector<Edge<TVertex,TWeight>>::const_iterator begin() const;
+    typename std::vector<Edge<TVertex,TWeight>>::const_iterator end() const;
 private:
-    std::vector<Edge> edges;
+    std::vector<Edge<TVertex,TWeight>> edges;
     int graph_size;
 };

@@ -5,29 +5,34 @@
 #include "BruteForceSolver.hpp"
 #include "Tests.hpp"
 
-Tests::Tests(int from, int to, int num_of_repetitions) {
+Tests::Tests(int from, int to, int num_of_repetitions)
+{
     this->from = from;
     this->to = to;
     for(int i = from; i <= to; ++i) {
         testPoints(i, num_of_repetitions);
     }
 }
-void Tests::printComparison() const {
+
+void Tests::printComparison() const
+{
     for(int i = from; i <= to; ++i) {
         std::cout.fixed;
         std::cout.precision(4);
         std::cout << "N: " << i << ": " << "average ratio aproximate/accurate decisions: " << meanRatio[i - from] << " Standart deviation:" << standartDeviationOfRatio[i - from] << std::endl;
     }
 }
-void Tests::testPoints(int numOfPoints, int numRepetitions) {
-    BoxMullerGenerator gen(numOfPoints);
+
+void Tests::testPoints(int numOfPoints, int numRepetitions)
+{
+    BoxMullerGenerator<double> pointGenerator(numOfPoints);
     std::vector<double> factors(numRepetitions);
     double sumFactors = 0;
     for(int i = 0; i < numRepetitions; ++i) {
-        auto points = gen.getPoints();
-        gen.generate_points(numOfPoints);
-        MSTSolver MST_solution(points);
-        BruteForceSolver brute_solution(points);
+        auto points = pointGenerator.getPoints();
+        pointGenerator.generate_points(numOfPoints);
+        MSTSolver<int, double ,double> MST_solution(points);
+        BruteForceSolver<int, double ,double> brute_solution(points);
         factors[i] = MST_solution.getDistance() / brute_solution.getDistance();
         sumFactors += factors[i];
     }

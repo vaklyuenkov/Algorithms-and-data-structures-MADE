@@ -2,6 +2,7 @@
 
 #include <vector>
 
+template <class TVertex>
 class NotOverlappingSets
 {
 public:
@@ -12,11 +13,11 @@ public:
     NotOverlappingSets& operator=(const NotOverlappingSets&) = delete;
     NotOverlappingSets& operator=(NotOverlappingSets&&) = delete;
 
-    void unionSets(int firstVertex, int secondVertex);
-    int find(int vertex);
+    void unionSets(TVertex firstVertex, TVertex secondVertex);
+    int find(TVertex vertex);
 
 private:
 
-    std::vector<int> parents;
-    std::vector<int> rank;
+    std::vector<TVertex> parents;
+    std::vector<TVertex> rank;
 };

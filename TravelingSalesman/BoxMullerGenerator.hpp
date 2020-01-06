@@ -3,6 +3,7 @@
 #include <vector>
 #include <utility>
 
+template <class TCoordinate>
 class BoxMullerGenerator {
 public:
     explicit BoxMullerGenerator(int n);
@@ -13,8 +14,8 @@ public:
     BoxMullerGenerator& operator=(BoxMullerGenerator&&) = delete;
 
     void generate_points(int n);
-    std::vector<std::pair<double, double>> getPoints() const;
+    std::vector<std::pair<TCoordinate, TCoordinate>> getPoints() const;
 
 private:
-    std::vector<std::pair<double, double>> points;
+    std::vector<std::pair<TCoordinate, TCoordinate>> points;
 };

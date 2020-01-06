@@ -13,7 +13,8 @@
 
 #include "Tests.hpp"
 
-int main() {
+int main()
+{
     Tests test(2, 10, 10); // from 2 to 10 with 10 repetitions
     test.printComparison();
     return 0;

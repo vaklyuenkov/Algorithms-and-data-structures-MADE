@@ -1,6 +1,7 @@
 #include "NotOverlappingSets.hpp"
 
-NotOverlappingSets::NotOverlappingSets(int size
+template <class TVertex>
+NotOverlappingSets<TVertex>::NotOverlappingSets(int size
 ) {
     parents.resize(size);
     rank.resize(size, 0);
@@ -8,7 +9,9 @@ NotOverlappingSets::NotOverlappingSets(int size
         parents[i] = i;
     }
 }
-void NotOverlappingSets::unionSets(int firstVertex, int secondVertex)
+
+template <class TVertex>
+void NotOverlappingSets<TVertex>::unionSets(TVertex firstVertex, TVertex secondVertex)
 {
     if((firstVertex = find(firstVertex)) == (secondVertex = find(secondVertex)))
     {
@@ -28,7 +31,9 @@ void NotOverlappingSets::unionSets(int firstVertex, int secondVertex)
         }
     }
 }
-int NotOverlappingSets::find(int vertex)
+
+template <class TVertex>
+int NotOverlappingSets<TVertex>::find(TVertex vertex)
 {
     if(vertex == parents[vertex])
     {
@@ -41,3 +46,5 @@ int NotOverlappingSets::find(int vertex)
         return value;
     }
 }
+
+template class NotOverlappingSets<int>;
