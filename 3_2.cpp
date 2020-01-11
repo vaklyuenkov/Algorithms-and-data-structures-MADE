@@ -27,174 +27,204 @@ Out:
 
 // to sort we will use heap functions from my previous task
 int getParentPosition(int position)
-    {
-        return (position-1)/2;
-    }
+{
+    return (position-1)/2;
+}
 
 int getLefChildPosition(int position)
-    {
-        return (2*position+1);
-    }
+{
+    return (2*position+1);
+}
 
 int getRightChildPosition(int position)
-    {
-        return (2*position+2);
-    }
+{
+    return (2*position+2);
+}
 
 template <class T, class TLess>
 void siftDown(T *heapArray, int heapSize,  int position, TLess comparator)
+{
+    while(position*2+1 <= heapSize-1)  // check that current position could have at least one child
     {
-        while(position*2+1 <= heapSize-1)  // check that current position could have at least one child
+        int lefChildPosition = getLefChildPosition(position);
+        int rightChildPosition = getRightChildPosition(position);
+        int positionOfMaximum = position;
+
+        if (lefChildPosition <= heapSize - 1 && comparator(heapArray[position], heapArray[lefChildPosition]))
+            positionOfMaximum = lefChildPosition;
+
+        if (rightChildPosition <= heapSize - 1 && comparator(heapArray[positionOfMaximum],  heapArray[rightChildPosition]))
+            positionOfMaximum = rightChildPosition;
+
+        if (position != positionOfMaximum)
         {
-            int lefChildPosition = getLefChildPosition(position);
-            int rightChildPosition = getRightChildPosition(position);
-            int positionOfMaximum = position;
-
-            if (lefChildPosition <= heapSize - 1 && comparator(heapArray[position], heapArray[lefChildPosition]))
-                positionOfMaximum = lefChildPosition;
-
-            if (rightChildPosition <= heapSize - 1 && comparator(heapArray[positionOfMaximum],  heapArray[rightChildPosition]))
-                positionOfMaximum = rightChildPosition;
-
-            if (position != positionOfMaximum)
-            {
-                std::swap(heapArray[position], heapArray[positionOfMaximum]);
-                position = positionOfMaximum;
-            }
-            else break;
+            std::swap(heapArray[position], heapArray[positionOfMaximum]);
+            position = positionOfMaximum;
         }
+        else break;
     }
+}
 
 template <class T, class TLess>
 void heapSort(T *array, int arraySize, TLess comparator)
+{
+    for (int i = getParentPosition(arraySize - 1); i >= 0; i--)  //first build heap
     {
-        for (int i = getParentPosition(arraySize - 1); i >= 0; i--)  //first build heap
-        {
-            siftDown(array, arraySize, i, comparator);
-        }
-        for (int i=arraySize-1; i>=0; i--)  // second - sort
-        {
-            std::swap(array[0], array[i]); // Move current root to end
-            siftDown(array, i, 0,  comparator); //heapify
-        }
+        siftDown(array, arraySize, i, comparator);
     }
+    for (int i=arraySize-1; i>=0; i--)  // second - sort
+    {
+        std::swap(array[0], array[i]); // Move current root to end
+        siftDown(array, i, 0,  comparator); //heapify
+    }
+}
 
 template <class T>
-void merge (const T *firstArray, const T *secondArray, T *result, int firstArraySize, int secondArraySize)
+void merge (T *buffer, int firstArraySize, int secondArraySize)
+{
+    T* firstArrayBuffer = new int[firstArraySize];
+
+    for (int i = 0; i< firstArraySize; i++)  // копируем первые k элементов массива в отдельный буфер.
     {
-        int i=0; //index of element to compare in first array
-        int j=0; //index of element to compare in second array
+        firstArrayBuffer[i] = buffer[i];
+    }
 
-        while (i != firstArraySize && j != secondArraySize) // to check not all values was taken from one of arrays
+    int i=0; //index of element to compare in first array
+    int j=firstArraySize; //index of element to compare in second array
+
+    while (i != firstArraySize && j != firstArraySize+secondArraySize) // to check not all values was taken from one of arrays
+    {
+        if (firstArrayBuffer[i] < buffer[j])
         {
-            if (firstArray[i] < secondArray[j])
-            {
-                result[i+j]=firstArray[i];
-                i++;
-            }
-
-            else
-            {
-                result[i+j]=secondArray[j];
-                j++;
-            }
+            buffer[i+j-firstArraySize]=firstArrayBuffer[i];
+            i++;
         }
 
-        // copy the rest of the the remaining array into the result according to the lecture
-        if (i == firstArraySize)
+        else
         {
-            for (; j < secondArraySize; j++)
-            {
-                result[i+j]=secondArray[j];
-            }
-
-        }
-
-        else if (j == secondArraySize)
-        {
-            for (; i < firstArraySize; i++)
-            {
-                result[i+j]=firstArray[i];
-            }
+            buffer[i+j-firstArraySize]=buffer[j];
+            j++;
         }
     }
 
-template <class T, class TLess>
-std::vector <T> sortAlmostSorted(T *inputArray, int offset, int inputSize, TLess comparator)
+    // copy the rest of the the remaining array into the result according to the lecture
+    if (i == firstArraySize)
     {
-        T* firstArray = new int[offset];
-        T* secondArray = new int[offset];
-        T* mergedArray = new int[2 * offset]; // we allocate memory in sum 4*k == O(k)
-        std::vector <T> answer;
-
-        int globalCounter = 0; // to store len of all data we already read
-        int localCounter = 0;  // to store len of data we read in current array
-
-        while (globalCounter < inputSize)
+        for (; j < firstArraySize+secondArraySize; j++)
         {
-            if (globalCounter == 0)
-            {
-                for (int i=0; i < offset;  i++)
-                {
-                    firstArray[i] = inputArray[i];
-                    localCounter+=1;
-                    globalCounter+=1;
-                }
-                heapSort(firstArray, offset,comparator); // heap sort
-            }
-
-            localCounter=0;
-            for (int i=0; i < offset && globalCounter < inputSize;  i++)
-            {
-                secondArray[i] = inputArray[globalCounter];
-                localCounter+=1;
-                globalCounter+=1;
-            }
-
-            heapSort(secondArray, localCounter, comparator); // heap sort
-            merge(firstArray, secondArray, mergedArray, offset, localCounter);
-
-            for (int i=0; i < offset; i++) //we can be sure only in first half of merged array
-            {
-                answer.push_back(mergedArray[i]);
-            }
-
-            for (int i=0; i < offset;  i++) //move second half of merged array to firsArray to merge with next batch of data
-            {
-                firstArray[i]=mergedArray[i + offset];
-            }
+            buffer[i+j-firstArraySize]=buffer[j];
         }
 
-        for (int i=offset; i < offset + localCounter; i++) //print the rest
-        {
-            answer.push_back(mergedArray[i]);
-        }
-
-        delete [] firstArray;
-        delete [] secondArray;
-        delete [] mergedArray;
-
-        return answer;
     }
+
+    else if (j == secondArraySize + firstArraySize)
+    {
+        for (; i < firstArraySize; i++)
+        {
+            buffer[i+j-firstArraySize]=firstArrayBuffer[i];
+        }
+    }
+
+    delete [] firstArrayBuffer;
+}
 
 int main ()
-    {
-        int inputSize = 0; // length of input array
-        int offset = 0;    // k
+{
+    int inputSize = 0; // length of input array
+    int offset = 0;    // k
 
-        std::cin >> inputSize >> offset;
-        int* input = new int[inputSize];
+    std::cin >> inputSize >> offset;
+    int* buffer = new int[2*offset];
+
+    if (inputSize < 2*offset) //the very special case
+    {
         for (int i = 0; i < inputSize; i++)
         {
-            std::cin >> input[i];
+            std::cin >> buffer[i];
         }
-        std::vector <int> answer;
-        answer = sortAlmostSorted(input, offset, inputSize, std::less<int>());
-        for (auto element: answer)
+        heapSort(buffer, inputSize, std::less<int>());
+
+        for (int i = 0; i < inputSize; i++)
         {
-            std::cout << element << " ";
+            std::cout << buffer[i] << " ";
         }
 
-        delete [] input;
         return 0;
     }
+
+    for (int i=0; i < 2*offset;  i++)
+    {
+        std::cin >> buffer[i];
+    }
+
+    heapSort(buffer,2*offset,std::less<int>());
+
+    for (int i=0; i < offset; i++)
+    {
+        std::cout << buffer[i] << " ";
+    }
+
+    int offsetsCounter = 2;
+
+    while (offsetsCounter < inputSize / offset)
+    {
+        for (int i=0; i < offset ; i++) // Считываеем в первую половину.
+        {
+            std::cin >> buffer[i];
+        }
+        offsetsCounter+=1;
+
+        heapSort(buffer,offset, std::less<int>()); // Сортируем первую половину
+        merge(buffer, offset, offset); // merge'им со второй, записывая ответ в тот же буфер
+
+        for (int i=0; i < offset; i++)
+        {
+            std::cout << buffer[i] << " ";
+        }
+    }
+
+    if (offsetsCounter*offset == inputSize)
+    {
+        for (int i = offset; i < 2*offset; i++)
+        {
+            std::cout << buffer[i] << " ";
+        }
+    }
+    else
+    {
+        int rest = inputSize%offset;
+        for (int i = 0; i < rest; i++)
+        {
+            std::cin >> buffer[i];
+        }
+        heapSort(buffer, rest, std::less<int>());
+
+
+        int* bufferForCopy = new int[rest];
+        for (int i = 0; i < offset; i++)
+        {
+            if (i < rest)
+            {
+                bufferForCopy[i] = buffer[i];
+            }
+
+            buffer[i] = buffer[i+offset];
+
+            if (i < rest)
+            {
+                buffer[i+offset] = bufferForCopy[i];
+            }
+        }
+
+        delete [] bufferForCopy;
+        merge(buffer, offset, rest);
+
+        for (int i = 0; i < offset+rest; i++)
+        {
+            std::cout << buffer[i] << " ";
+        }
+    }
+
+    delete [] buffer;
+    return 0;
+}
