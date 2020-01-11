@@ -177,7 +177,7 @@ int main ()
         heapSort(buffer,offset, std::less<int>()); // Сортируем первую половину
         merge(buffer, offset, offset); // merge'им со второй, записывая ответ в тот же буфер
 
-        for (int i=0; i < offset; i++)
+        for (int i=0; i < offset; i++)  // Выводим первые k элементов нового массива
         {
             std::cout << buffer[i] << " ";
         }
